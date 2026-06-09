@@ -1,0 +1,1 @@
+ALTER TABLE `glasses_frames` ADD `recommendedFaceShapes` text;

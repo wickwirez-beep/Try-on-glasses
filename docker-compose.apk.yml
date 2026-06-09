@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  apk-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.android
+    container_name: the-look-apk-builder
+    volumes:
+      - ./apk-output:/output
+      - .:/app
+    environment:
+      - ANDROID_HOME=/opt/android-sdk
+      - JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    command: >
+      sh -c "
+        echo '🔨 Building The Look APK...' &&
+        cd /app &&
+        pnpm install &&
+        pnpm build &&
+        pnpm add -D @capacitor/core @capacitor/cli @capacitor/android &&
+        npx cap init --web-dir dist/client &&
+        npx cap add android &&
+        npx cap sync android &&
+        cd android &&
+        chmod +x gradlew &&
+        ./gradlew assembleDebug --no-daemon &&
+        cd .. &&
+        cp android/app/build/outputs/apk/debug/app-debug.apk /output/the-look.apk &&
+        echo '✅ APK build complete!' &&
+        echo '📍 APK location: /output/the-look.apk'
+      "
+
+volumes:
+  apk-output:
+    driver: local

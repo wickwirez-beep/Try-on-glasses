@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1780944495227,
+      "tag": "0000_luxuriant_wendigo",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1780944662024,
+      "tag": "0001_yielding_butterfly",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1780953120809,
+      "tag": "0002_needy_killmonger",
+      "breakpoints": true
+    }
+  ]
+}
