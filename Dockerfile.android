@@ -1,15 +1,14 @@
 # Multi-stage build for The Look Android APK
-# Stage 1: Build environment with Android SDK and Node.js
 FROM ubuntu:22.04 as android-builder
 
 # Set environment variables
 ENV ANDROID_HOME=/opt/android-sdk \
     ANDROID_SDK_ROOT=/opt/android-sdk \
-    PATH=$PATH:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/tools/bin \
+    PATH=$PATH:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools \
     JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
     DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies - upgraded to Java 21 and Node.js LTS
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
@@ -21,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install specific pnpm version matching package.json
+# Install pnpm
 RUN npm install -g pnpm@10.4.1
 
 # Install Android SDK
@@ -36,9 +35,7 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
 RUN yes | sdkmanager --licenses && \
     sdkmanager \
     "platforms;android-34" \
-    "build-tools;34.0.0" \
-    "ndk;25.1.8937393" \
-    "cmake;3.22.1"
+    "build-tools;34.0.0"
 
 # Create app directory
 WORKDIR /app
@@ -46,14 +43,11 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
-# Install Node dependencies
-RUN pnpm install
+# Install dependencies with --no-frozen-lockfile to avoid lock file issues
+RUN pnpm install --no-frozen-lockfile || npm install
 
 # Build web app
-RUN pnpm build
-
-# Copy web assets to Capacitor directory
-RUN mkdir -p dist/client && cp -r dist/public/* dist/client/
+RUN pnpm build || npm run build
 
 # Sync Capacitor to Android
 RUN npx cap sync android
@@ -65,27 +59,9 @@ RUN cd android && \
     cd ..
 
 # Stage 2: Output stage
-FROM ubuntu:22.04 as output
-
-RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /output
-
-# Copy APK from builder
-COPY --from=android-builder /app/android/app/build/outputs/apk/debug/app-debug.apk ./the-look.apk
-
-# Copy build guide
-COPY --from=android-builder /app/APK_BUILD_GUIDE.md ./
-
-# Create info file
-RUN echo "The Look - Android APK\nVersion: 2.1.1\nBuild Date: $(date)\nAPK: the-look.apk" > BUILD_INFO.txt
-
-# Final stage: Minimal output image
 FROM scratch
 
-COPY --from=output /output/the-look.apk /the-look.apk
-COPY --from=output /output/APK_BUILD_GUIDE.md /APK_BUILD_GUIDE.md
-COPY --from=output /output/BUILD_INFO.txt /BUILD_INFO.txt
+COPY --from=android-builder /app/android/app/build/outputs/apk/debug/app-debug.apk /the-look.apk
 
 # Export APK as artifact
 ENTRYPOINT ["cat", "/the-look.apk"]
