@@ -6,23 +6,23 @@ FROM ubuntu:22.04 as android-builder
 ENV ANDROID_HOME=/opt/android-sdk \
     ANDROID_SDK_ROOT=/opt/android-sdk \
     PATH=$PATH:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/tools/bin \
-    JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
     DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies
+# Install dependencies - upgraded to Java 21 and Node.js LTS
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
     git \
     unzip \
-    openjdk-11-jdk \
+    openjdk-21-jdk \
     nodejs \
     npm \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js LTS
-RUN npm install -g pnpm
+# Install specific pnpm version matching package.json
+RUN npm install -g pnpm@10.4.1
 
 # Install Android SDK
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
@@ -35,8 +35,8 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
 # Install Android SDK components
 RUN yes | sdkmanager --licenses && \
     sdkmanager \
-    "platforms;android-33" \
-    "build-tools;33.0.1" \
+    "platforms;android-34" \
+    "build-tools;34.0.0" \
     "ndk;25.1.8937393" \
     "cmake;3.22.1"
 
@@ -52,17 +52,11 @@ RUN pnpm install
 # Build web app
 RUN pnpm build
 
-# Install Capacitor
-RUN pnpm add -D @capacitor/core @capacitor/cli @capacitor/android
+# Copy web assets to Capacitor directory
+RUN mkdir -p dist/client && cp -r dist/public/* dist/client/
 
-# Initialize Capacitor
-RUN npx cap init --web-dir dist/client || true
-
-# Add Android platform
-RUN npx cap add android || true
-
-# Sync files
-RUN npx cap sync android || true
+# Sync Capacitor to Android
+RUN npx cap sync android
 
 # Build APK
 RUN cd android && \
