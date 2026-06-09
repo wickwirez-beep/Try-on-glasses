@@ -35,7 +35,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
       
       - name: Set up Android SDK
@@ -47,12 +47,17 @@ jobs:
       - name: Accept Android licenses
         run: yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
       
+      - name: Copy web assets to Capacitor
+        run: |
+          mkdir -p dist/client
+          cp -r dist/public/* dist/client/
+      
       - name: Sync Capacitor to Android
         run: npx cap sync android
       
       - name: Build APK
         working-directory: ./android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --stacktrace
       
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
