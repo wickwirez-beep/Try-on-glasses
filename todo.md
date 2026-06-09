@@ -336,10 +336,29 @@ All missing features have been restored to the Android build.
 - [x] Created APK installation guide for users
 
 ### Next Steps
-- [ ] Export project to GitHub repository
-- [ ] Push code to trigger first automated build
+- [ ] Export project to GitHub repository (via Management UI)
+- [ ] Monitor GitHub Actions APK build workflow
 - [ ] Download APK from GitHub Actions artifacts
 - [ ] Test APK installation on Android device
 - [ ] Verify all features work on Android (camera, face detection, glasses overlay)
 - [ ] Test on multiple Android devices (different screen sizes, OS versions)
 - [ ] Create release with APK download link
+
+## GitHub Export (Copy Session)
+
+### Export to GitHub
+- [x] Push code to GitHub repository (wickwirez-beep/Try-on-glasses)
+- [x] Fix GitHub Actions workflow (pnpm installation order)
+- [ ] Wait for APK build to complete
+- [ ] Download APK from workflow artifacts
+- [ ] Test APK on Android device
+- [ ] Verify all features work on Android
+
+### Build Status
+- First build (Commit 0656042): FAILED - pnpm not found
+- Second build (Commit e5f8676): IN PROGRESS - workflow fixed
+
+### Workflow Fix Applied
+- Moved pnpm installation before Node.js cache setup
+- This ensures pnpm is available when needed
+- Workflow should now build APK successfully

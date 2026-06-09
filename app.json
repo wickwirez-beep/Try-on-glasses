@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "The Look",
+    "slug": "the-look",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./client/public/favicon.ico",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./client/public/favicon.ico",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./client/public/favicon.ico",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.theglasses.tryon"
+    },
+    "web": {
+      "favicon": "./client/public/favicon.ico"
+    }
+  }
+}
